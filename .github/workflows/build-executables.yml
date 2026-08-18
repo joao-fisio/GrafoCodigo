@@ -21,48 +21,63 @@ jobs:
             artifact: grafocodigo-macos
           - os: ubuntu-latest
             artifact: grafocodigo-linux
+
     runs-on: ${{ matrix.os }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Baixar código
+        uses: actions/checkout@v5
+
+      - name: Configurar Python
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Install Linux GUI libraries
+
+      - name: Instalar bibliotecas gráficas no Linux
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y python3-tk xvfb
-      - run: python -m pip install -e ".[test,build]"
-      - run: pytest -m "not browser"
 
-      - name: Build Windows executable
+      - name: Instalar projeto
+        run: python -m pip install -e ".[test,build]"
+
+      - name: Executar testes
+        run: pytest -m "not browser"
+
+      - name: Gerar executável do Windows
         if: runner.os == 'Windows'
         run: pyinstaller --clean --onefile --noconsole --name GrafoCodigo app_gui.py
-      - name: Package Windows executable
+
+      - name: Compactar executável do Windows
         if: runner.os == 'Windows'
         shell: pwsh
         run: Compress-Archive -Path dist/GrafoCodigo.exe -DestinationPath GrafoCodigo-Windows-x64.zip
 
-      - name: Build macOS application
+      - name: Gerar aplicativo do macOS
         if: runner.os == 'macOS'
         run: pyinstaller --clean --windowed --name GrafoCodigo app_gui.py
-      - name: Package macOS application
+
+      - name: Compactar aplicativo do macOS
         if: runner.os == 'macOS'
         run: ditto -c -k --sequesterRsrc --keepParent dist/GrafoCodigo.app GrafoCodigo-macOS.zip
 
-      - name: Build Linux executable
+      - name: Gerar executável do Linux
         if: runner.os == 'Linux'
         run: pyinstaller --clean --onefile --noconsole --name GrafoCodigo app_gui.py
-      - name: Smoke test Linux window
+
+      - name: Testar janela no Linux
         if: runner.os == 'Linux'
         shell: bash
         run: |
           status=0
           timeout 5s xvfb-run -a dist/GrafoCodigo || status=$?
           test "$status" -eq 124
-      - name: Package Linux executable
+
+      - name: Compactar executável do Linux
         if: runner.os == 'Linux'
         run: tar -czf GrafoCodigo-Linux-x64.tar.gz -C dist GrafoCodigo
 
-      - uses: actions/upload-artifact@v4
+      - name: Salvar aplicativos
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact }}
           path: GrafoCodigo-*
@@ -72,17 +87,22 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     needs: build
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
+
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Baixar aplicativos
+        uses: actions/download-artifact@v6
         with:
           pattern: grafocodigo-*
           merge-multiple: true
           path: release
-      - name: Create checksums
+
+      - name: Criar checksums
         run: cd release && sha256sum GrafoCodigo-* > SHA256SUMS.txt
-      - name: Publish GitHub Release
+
+      - name: Publicar versão
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" release/* --verify-tag --generate-notes --title "GrafoCódigo $GITHUB_REF_NAME"

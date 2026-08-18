@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-SCRIPT = Path(__file__).parents[1] / "mapear_codigo_atualizado.py"
+SCRIPT = Path(__file__).parents[1] / "grafocodigo.py"
 
 
 def test_cli_gera_html_e_auditoria(tmp_path):

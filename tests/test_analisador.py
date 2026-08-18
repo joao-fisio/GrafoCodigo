@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-import mapear_codigo_atualizado as mapa
+import grafocodigo as mapa
 import pytest
 
 

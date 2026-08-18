@@ -30,11 +30,11 @@ build = [
 ]
 
 [project.scripts]
-grafocodigo = "mapear_codigo_atualizado:main"
+grafocodigo = "grafocodigo:main"
 grafocodigo-gui = "app_gui:main"
 
 [tool.setuptools]
-py-modules = ["mapear_codigo_atualizado", "app_gui"]
+py-modules = ["grafocodigo", "app_gui"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,4 +1,4 @@
-import mapear_codigo_atualizado as mapa
+import grafocodigo as mapa
 import pytest
 
 pytestmark = pytest.mark.browser

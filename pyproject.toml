@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "grafocodigo"
+version = "1.1.0"
+description = "Gerador local e auditável de mapas de dependências entre arquivos"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+authors = [
+  {name = "João Pedro Conceição"},
+]
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+
+[project.urls]
+Homepage = "https://github.com/joao-fisio/grafocodigo"
+Repository = "https://github.com/joao-fisio/grafocodigo"
+Issues = "https://github.com/joao-fisio/grafocodigo/issues"
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8,<10",
+  "playwright>=1.48,<2",
+]
+build = [
+  "pyinstaller>=6.10,<7",
+]
+
+[project.scripts]
+grafocodigo = "mapear_codigo_atualizado:main"
+grafocodigo-gui = "app_gui:main"
+
+[tool.setuptools]
+py-modules = ["mapear_codigo_atualizado", "app_gui"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["browser: requer Chromium via Playwright"]

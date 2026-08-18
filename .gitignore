@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+pytest-of-root/
+.coverage
+htmlcov/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+*.spec
+grafo_codigo.html
+*.audit.json
+playwright-report/
+test-results/

@@ -155,9 +155,11 @@ def test_html_offline_e_json_auditavel(tmp_path):
 
 
 def test_nome_hostil_nao_fecha_script(tmp_path):
-    nome = 'x"><img src=x onerror=alert(1)>.txt'
-    escrever(tmp_path, nome, "texto\n")
+    escrever(tmp_path, "arquivo.txt", "texto\n")
     nos, arestas, relatorio = mapa.construir_dados(tmp_path, detalhado=True)
+    nome = 'x"><img src=x onerror=alert(1)>.txt'
+    nos[0]["nome"] = nome
+    nos[0]["arquivo"] = nome
 
     html = mapa.gerar_html(nos, arestas, "seguro", relatorio)
 

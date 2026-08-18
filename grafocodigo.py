@@ -464,13 +464,15 @@ def construir_dados(pasta: Path, detalhado=False, excluir=None):
     for arq in todos_arquivos:
         nome = arq.stem
         ext = arq.suffix.lower()
-        rel = str(arq.relative_to(pasta))
+        # O grafo usa sempre caminhos POSIX internamente. Isso mantém os dados
+        # idênticos em Windows, macOS e Linux e evita chaves com barras invertidas.
+        rel = arq.relative_to(pasta).as_posix()
         tipo = tipo_arquivo(arq)
         texto, encoding, motivo, digest = ler_texto(arq, python=ext == ".py")
         if texto is None:
             relatorio["ignorados"].append(
                 {
-                    "arquivo": rel.replace("\\", "/"),
+                    "arquivo": rel,
                     "motivo": motivo or "falha_de_leitura",
                 }
             )
@@ -481,7 +483,7 @@ def construir_dados(pasta: Path, detalhado=False, excluir=None):
         else:
             info = extrair_generico(arq, texto, tipo, encoding)
 
-        chave = rel.replace("\\", "/")
+        chave = rel
         info["arquivo"] = rel
         info["nome"] = nome
         info["ext"] = ext
@@ -490,7 +492,7 @@ def construir_dados(pasta: Path, detalhado=False, excluir=None):
         modulos[chave] = info
         relatorio["analisados"].append(
             {
-                "arquivo": rel.replace("\\", "/"),
+                "arquivo": rel,
                 "parser": info["parser"],
                 "encoding": info["encoding"],
                 "sha256": info["sha256"],
@@ -498,7 +500,7 @@ def construir_dados(pasta: Path, detalhado=False, excluir=None):
         )
         if info.get("erro"):
             relatorio["erros"].append(
-                {"arquivo": rel.replace("\\", "/"), "motivo": "sintaxe_python_invalida"}
+                {"arquivo": rel, "motivo": "sintaxe_python_invalida"}
             )
 
     if not modulos:
@@ -1634,19 +1636,19 @@ def main():
     except ValueError as exc:
         print(f"Erro: {exc}", file=sys.stderr)
         return 2
-    print(f"  → {len(nos)} arquivos encontrados")
-    print(f"  → {len(arestas)} conexões mapeadas")
+    print(f"  - {len(nos)} arquivos encontrados")
+    print(f"  - {len(arestas)} conexões mapeadas")
 
     resumo = relatorio["resumo"]
     print(
-        f"  → {resumo['arquivos_ignorados']} arquivos ignorados (documentados no relatório)"
+        f"  - {resumo['arquivos_ignorados']} arquivos ignorados (documentados no relatório)"
     )
     print(
-        f"  → {resumo['pastas_ignoradas']} pastas ignoradas pela política de exclusão"
+        f"  - {resumo['pastas_ignoradas']} pastas ignoradas pela política de exclusão"
     )
-    print(f"  → {resumo['referencias_ambiguas']} referências ambíguas")
+    print(f"  - {resumo['referencias_ambiguas']} referências ambíguas")
     print(
-        f"  → {resumo['referencias_nao_resolvidas']} referências não resolvidas/externas"
+        f"  - {resumo['referencias_nao_resolvidas']} referências não resolvidas/externas"
     )
 
     html = gerar_html(nos, arestas, pasta.name, relatorio)
@@ -1660,7 +1662,7 @@ def main():
             ),
             encoding="utf-8",
         )
-        print(f"  → auditoria: {auditoria}")
+        print(f"  - auditoria: {auditoria}")
     print(f"\nPronto! Abra no navegador:\n  {saida}")
     if args.estrito and (relatorio["erros"] or relatorio["ambiguas"]):
         print(
